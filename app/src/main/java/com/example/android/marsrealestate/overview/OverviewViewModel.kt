@@ -40,6 +40,10 @@ class OverviewViewModel : ViewModel() {
     val response: LiveData<String>
         get() = _response
 
+    private val _property = MutableLiveData<MarsProperty>()
+
+    val property: LiveData<MarsProperty>
+        get() = _property
     /**
      * Call getMarsRealEstateProperties() on init so we can display status immediately.
      */
@@ -53,10 +57,11 @@ class OverviewViewModel : ViewModel() {
         //створює та запускає новий потік на фоні.
         viewModelScope.launch {
             try {
-                //запитує властивості нерухомості на Марсі.
                 val listResult = MarsApi.retrofitService.getProperties()
                 _response.value = "Success: ${listResult.size} Mars properties retrieved"
-                //список властивостей нерухомості, отриманий від AP
+                if (listResult.size > 0) {
+                    _property.value = listResult[0]
+                }
             } catch (e: Exception) {
                 _response.value = "Failure: ${e.message}"
             }
