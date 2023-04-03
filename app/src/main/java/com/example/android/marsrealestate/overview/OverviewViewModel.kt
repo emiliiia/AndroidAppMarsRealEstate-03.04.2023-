@@ -20,8 +20,10 @@ package com.example.android.marsrealestate.overview
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.android.marsrealestate.network.MarsApi
 import com.example.android.marsrealestate.network.MarsProperty
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -45,21 +47,19 @@ class OverviewViewModel : ViewModel() {
         getMarsRealEstateProperties()
     }
 
-    //виконує запит до API та оброблює результат
+    //запускає корутину, яка запитує властивості нерухомості на Марсі та
+    //оновлює значення _response в залежності від результату запиту
     private fun getMarsRealEstateProperties() {
-        //отримує властивості Mars Real Estate за допомогою getProperties()
-        //Результат запиту передається у вигляді об'єкта Call<String>
-        MarsApi.retrofitService.getProperties().enqueue(
-            object: Callback<List<MarsProperty>> {
-                override fun onResponse(call: Call<List<MarsProperty>>,
-                                        response: Response<List<MarsProperty>>) {
-                    _response.value =
-                        "Success: ${response.body()?.size} Mars properties retrieved"
-                }
-
-                override fun onFailure(call: Call<List<MarsProperty>>, t: Throwable) {
-                    _response.value = "Failure: " + t.message
-                }
-            })
+        //створює та запускає новий потік на фоні.
+        viewModelScope.launch {
+            try {
+                //запитує властивості нерухомості на Марсі.
+                val listResult = MarsApi.retrofitService.getProperties()
+                _response.value = "Success: ${listResult.size} Mars properties retrieved"
+                //список властивостей нерухомості, отриманий від AP
+            } catch (e: Exception) {
+                _response.value = "Failure: ${e.message}"
+            }
+        }
     }
 }

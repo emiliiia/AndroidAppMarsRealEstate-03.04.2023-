@@ -37,11 +37,10 @@ private val retrofit = Retrofit.Builder()
     .baseUrl(BASE_URL)
     .build()
 
-// Оголошуємо інтерфейс сервісу з методом для отримання властивостей
+// Оголошуємо інтерфейс сервісу з методом для отримання властивостейІ
 interface MarsApiService {
     @GET("realestate")
-    fun getProperties():
-            Call<List<MarsProperty>>
+    suspend fun getProperties(): List<MarsProperty>
 }
 
 // Створюємо об'єкт-синглтон для отримання сервісу через lazy-ініціалізацію
@@ -49,3 +48,4 @@ object MarsApi {
     val retrofitService : MarsApiService by lazy {
         retrofit.create(MarsApiService::class.java) }
 }
+
